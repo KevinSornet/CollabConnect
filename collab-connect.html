@@ -1,0 +1,812 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Collab Connect — Influencer Intelligence</title>
+<link href="https://fonts.googleapis.com/css2?family=Clash+Display:wght@400;500;600;700&family=Cabinet+Grotesk:wght@300;400;500;700;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --ink:#0d0d14; --ink2:#13131e; --ink3:#1a1a28;
+  --wire:rgba(255,255,255,0.06); --wire2:rgba(255,255,255,0.1);
+  --lime:#b9ff4b; --lime-dim:rgba(185,255,75,0.12);
+  --coral:#ff6b6b; --sky:#60c3ff; --violet:#9b6dff; --gold:#ffc46b;
+  --text:#eeeef5; --muted:#5a5a72; --muted2:#3a3a52;
+  --card:rgba(19,19,30,0.9); --r:14px;
+}
+*,*::before,*::after{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--ink);color:var(--text);font-family:'Cabinet Grotesk',sans-serif;font-size:14px;line-height:1.6;overflow-x:hidden;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(185,255,75,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(185,255,75,.025) 1px,transparent 1px);background-size:48px 48px;pointer-events:none}
+.orb{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:0}
+.orb1{width:500px;height:500px;top:-150px;right:-100px;background:rgba(155,109,255,.18)}
+.orb2{width:400px;height:400px;bottom:-100px;left:-100px;background:rgba(185,255,75,.08)}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:100;height:64px;display:flex;align-items:center;justify-content:space-between;padding:0 32px;background:rgba(13,13,20,.85);backdrop-filter:blur(24px);border-bottom:1px solid var(--wire)}
+.logo{font-family:'Clash Display',sans-serif;font-weight:700;font-size:20px;letter-spacing:-.5px;display:flex;align-items:center;gap:8px;cursor:pointer}
+.logo-mark{width:28px;height:28px;background:var(--lime);border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:14px;color:var(--ink);font-weight:800}
+.logo-text span{color:var(--lime)}
+.nav-tabs{display:flex;gap:2px;background:var(--ink3);border:1px solid var(--wire);border-radius:10px;padding:4px}
+.ntab{padding:6px 16px;border-radius:7px;font-size:13px;font-weight:500;cursor:pointer;color:var(--muted);transition:all .2s;border:none;background:transparent;font-family:'Cabinet Grotesk',sans-serif}
+.ntab:hover{color:var(--text)}
+.ntab.on{background:var(--lime);color:var(--ink);font-weight:700}
+.nav-right{display:flex;align-items:center;gap:10px}
+.ig-btn{display:flex;align-items:center;gap:7px;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:#fff;border:none;border-radius:9px;padding:8px 16px;font-size:13px;font-weight:700;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;transition:opacity .2s}
+.ig-btn:hover{opacity:.88}
+.status-pill{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted)}
+.sdot{width:7px;height:7px;border-radius:50%;background:var(--muted2);transition:all .3s}
+.sdot.live{background:#4ade80;box-shadow:0 0 6px #4ade80}
+
+/* VIEWS */
+.view{display:none;padding-top:64px;min-height:100vh;position:relative;z-index:1}
+.view.on{display:block}
+
+/* LANDING */
+#v-land.on{display:flex;align-items:center;justify-content:center;text-align:center;flex-direction:column;padding:80px 24px 60px}
+@keyframes rise{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+@keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(1.5)}}
+.eyebrow{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--wire2);border-radius:100px;padding:5px 14px;font-size:11px;font-weight:700;color:var(--lime);text-transform:uppercase;letter-spacing:1px;margin-bottom:24px;animation:rise .5s ease both}
+.pdot{width:6px;height:6px;border-radius:50%;background:var(--lime);animation:pulse 1.5s infinite}
+.h1{font-family:'Clash Display',sans-serif;font-size:clamp(44px,6.5vw,88px);font-weight:700;line-height:.95;letter-spacing:-2.5px;margin-bottom:24px;animation:rise .5s .08s ease both}
+.h1 em{font-style:normal;color:var(--lime);display:block}
+.sub{font-size:17px;color:var(--muted);max-width:460px;margin:0 auto 40px;font-weight:400;line-height:1.7;animation:rise .5s .15s ease both}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;animation:rise .5s .22s ease both}
+.btn-lime{background:var(--lime);color:var(--ink);padding:13px 30px;border-radius:10px;border:none;font-family:'Cabinet Grotesk',sans-serif;font-weight:800;font-size:15px;cursor:pointer;transition:transform .2s,box-shadow .2s}
+.btn-lime:hover{transform:translateY(-2px);box-shadow:0 14px 44px rgba(185,255,75,.3)}
+.btn-ghost{background:transparent;color:var(--text);padding:13px 30px;border-radius:10px;border:1px solid var(--wire2);font-family:'Cabinet Grotesk',sans-serif;font-weight:600;font-size:15px;cursor:pointer;transition:background .2s}
+.btn-ghost:hover{background:var(--ink3)}
+.feat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;max-width:820px;width:100%;margin-top:64px;padding-top:48px;border-top:1px solid var(--wire);animation:rise .5s .3s ease both}
+.feat{background:var(--card);border:1px solid var(--wire);border-radius:var(--r);padding:26px 22px;text-align:left;backdrop-filter:blur(10px)}
+.feat-icon{font-size:26px;margin-bottom:10px;display:block}
+.feat-title{font-family:'Clash Display',sans-serif;font-size:15px;font-weight:600;margin-bottom:5px}
+.feat-desc{font-size:12px;color:var(--muted);line-height:1.6}
+
+/* DASHBOARD */
+.dash{display:grid;grid-template-columns:210px 1fr 288px;min-height:calc(100vh - 64px)}
+.dsbar{border-right:1px solid var(--wire);padding:24px 14px;position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto}
+.dsbar-lbl{font-size:10px;text-transform:uppercase;letter-spacing:1.5px;color:var(--muted);padding:0 10px;margin-bottom:6px;margin-top:20px}
+.dsbar-lbl:first-child{margin-top:0}
+.si{display:flex;align-items:center;gap:9px;padding:8px 10px;border-radius:9px;cursor:pointer;color:var(--muted);font-size:13px;font-weight:500;transition:all .15s;border:none;background:transparent;width:100%;text-align:left;font-family:'Cabinet Grotesk',sans-serif}
+.si:hover{background:var(--ink3);color:var(--text)}
+.si.on{background:var(--lime-dim);color:var(--lime);font-weight:700}
+.sbadge{margin-left:auto;background:var(--ink3);border-radius:5px;padding:1px 7px;font-size:11px;color:var(--muted)}
+.si.on .sbadge{background:var(--lime-dim);color:var(--lime)}
+
+/* FEED */
+.feed{padding:24px 28px}
+.kpi-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:22px}
+.kpi{background:var(--card);border:1px solid var(--wire);border-radius:var(--r);padding:18px;position:relative;overflow:hidden;backdrop-filter:blur(10px)}
+.kpi::after{content:'';position:absolute;bottom:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--lime),transparent);opacity:.5}
+.kpi-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.8px;color:var(--muted);margin-bottom:7px}
+.kpi-val{font-family:'Clash Display',sans-serif;font-size:28px;font-weight:700;letter-spacing:-1px}
+.kpi-sub{font-size:11px;color:var(--lime);margin-top:3px;font-weight:600}
+.toolbar{display:flex;gap:9px;align-items:center;margin-bottom:14px;flex-wrap:wrap}
+.sbox{flex:1;min-width:180px;display:flex;align-items:center;gap:8px;background:var(--ink3);border:1px solid var(--wire2);border-radius:9px;padding:9px 13px;transition:border-color .2s}
+.sbox:focus-within{border-color:var(--lime)}
+.sbox input{background:none;border:none;outline:none;width:100%;color:var(--text);font-family:'Cabinet Grotesk',sans-serif;font-size:14px}
+.sbox input::placeholder{color:var(--muted)}
+.fsel{background:var(--ink3);border:1px solid var(--wire2);border-radius:9px;padding:9px 13px;color:var(--text);outline:none;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;font-size:13px;transition:border-color .2s}
+.fsel:focus{border-color:var(--lime)}
+.chips{display:flex;gap:7px;flex-wrap:wrap;margin-bottom:16px}
+.chip{padding:5px 13px;border-radius:100px;border:1px solid var(--wire2);background:transparent;color:var(--muted);font-size:12px;font-weight:600;cursor:pointer;transition:all .15s;font-family:'Cabinet Grotesk',sans-serif}
+.chip:hover{color:var(--text)}
+.chip.on{background:var(--lime);border-color:var(--lime);color:var(--ink)}
+
+/* CARDS */
+.cgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:14px}
+.icard{background:var(--card);border:1px solid var(--wire);border-radius:16px;overflow:hidden;backdrop-filter:blur(10px);transition:border-color .2s,transform .2s;cursor:pointer}
+.icard:hover{border-color:var(--wire2);transform:translateY(-3px)}
+.card-top{padding:18px;display:flex;gap:13px;align-items:flex-start}
+.av-wrap{position:relative;flex-shrink:0}
+.av{width:50px;height:50px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:17px}
+.av-ring{position:absolute;inset:-2px;border-radius:50%;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);z-index:-1;opacity:0;transition:opacity .2s}
+.icard:hover .av-ring{opacity:1}
+.cmeta{flex:1;min-width:0}
+.cname{font-family:'Clash Display',sans-serif;font-weight:600;font-size:15px;margin-bottom:1px}
+.chandle{color:var(--muted);font-size:12px;margin-bottom:7px}
+.nbadge{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:100px;text-transform:uppercase;letter-spacing:.5px}
+.cer-block{background:var(--lime-dim);border-radius:9px;padding:11px 15px;margin:0 18px;display:flex;align-items:center;justify-content:space-between}
+.cer-lbl{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+.cer-val{font-family:'Clash Display',sans-serif;font-size:22px;font-weight:700;color:var(--lime)}
+.ertrack{height:3px;background:rgba(255,255,255,.08);border-radius:2px;margin-top:5px;overflow:hidden}
+.erfill{height:100%;border-radius:2px;background:var(--lime)}
+.cstats{display:grid;grid-template-columns:repeat(3,1fr);margin:12px 18px 0;border:1px solid var(--wire);border-radius:9px;overflow:hidden}
+.cs{padding:11px 9px;text-align:center}
+.cs:not(:last-child){border-right:1px solid var(--wire)}
+.cs-v{font-family:'Clash Display',sans-serif;font-size:15px;font-weight:600;display:block}
+.cs-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.4px}
+.cbottom{padding:12px 18px;display:flex;gap:7px;align-items:center}
+.cloc{font-size:12px;color:var(--muted);flex:1}
+.cbtn{background:var(--ink3);border:1px solid var(--wire2);border-radius:7px;padding:6px 14px;color:var(--text);font-size:12px;font-weight:700;cursor:pointer;transition:all .15s;font-family:'Cabinet Grotesk',sans-serif}
+.cbtn:hover{background:var(--lime);color:var(--ink);border-color:var(--lime)}
+.igbtn{display:flex;align-items:center;gap:4px;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);border:none;border-radius:7px;padding:6px 12px;color:#fff;font-size:12px;font-weight:700;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;transition:opacity .2s}
+.igbtn:hover{opacity:.85}
+#no-res{display:none;text-align:center;padding:60px 20px;color:var(--muted)}
+#no-res div:first-child{font-size:36px;margin-bottom:10px}
+
+/* RIGHT PANEL */
+.dpanel{border-left:1px solid var(--wire);padding:24px 18px;position:sticky;top:64px;height:calc(100vh - 64px);overflow-y:auto}
+.plbl{font-family:'Clash Display',sans-serif;font-size:13px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:12px}
+.pcard{background:var(--ink3);border:1px solid var(--wire);border-radius:12px;padding:18px;margin-bottom:14px}
+.pcard-t{font-weight:700;font-size:14px;margin-bottom:3px}
+.pcard-s{font-size:12px;color:var(--muted);margin-bottom:14px;line-height:1.6}
+.igf{display:flex;flex-direction:column;gap:5px;margin-bottom:11px}
+.igf label{font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px}
+.igf input{background:var(--ink2);border:1px solid var(--wire2);border-radius:7px;padding:8px 11px;color:var(--text);font-family:'Cabinet Grotesk',sans-serif;font-size:13px;outline:none;transition:border-color .2s;width:100%}
+.igf input:focus{border-color:var(--lime)}
+.igf input::placeholder{color:var(--muted)}
+.igfetch{width:100%;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);color:#fff;border:none;border-radius:8px;padding:9px;font-size:13px;font-weight:800;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;transition:opacity .2s;margin-top:4px}
+.igfetch:hover{opacity:.88}
+.apistatus{font-size:12px;padding:7px 11px;border-radius:7px;margin-top:8px;font-weight:600;text-align:center;display:none}
+.apistatus.ok{background:rgba(74,222,128,.1);color:#4ade80;display:block}
+.apistatus.err{background:rgba(255,107,107,.1);color:var(--coral);display:block}
+.apistatus.loading{background:var(--lime-dim);color:var(--lime);display:block}
+.sl-list{display:flex;flex-direction:column;gap:8px}
+.sli{display:flex;align-items:center;gap:9px;background:var(--ink3);border:1px solid var(--wire);border-radius:9px;padding:10px}
+.slav{width:34px;height:34px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:12px;flex-shrink:0}
+.slname{font-size:13px;font-weight:600}
+.sler{font-size:11px;color:var(--lime);font-weight:700;margin-left:auto}
+.slrm{background:none;border:none;color:var(--muted);cursor:pointer;font-size:16px;padding:0 2px;transition:color .15s}
+.slrm:hover{color:var(--coral)}
+.guide-step{display:flex;gap:11px;margin-bottom:13px}
+.gnum{width:22px;height:22px;border-radius:50%;background:var(--lime-dim);border:1px solid rgba(185,255,75,.3);color:var(--lime);font-size:11px;font-weight:800;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px}
+.gtxt{font-size:12px;line-height:1.6;color:var(--muted)}
+.gtxt strong{color:var(--text)}
+
+/* API PAGE */
+#v-api .apg{max-width:840px;margin:0 auto;padding:40px 28px}
+.apg-title{font-family:'Clash Display',sans-serif;font-size:32px;font-weight:700;letter-spacing:-1px;margin-bottom:6px}
+.apg-sub{color:var(--muted);font-size:15px;margin-bottom:40px}
+.atwo{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+.acard{background:var(--card);border:1px solid var(--wire);border-radius:16px;padding:28px;backdrop-filter:blur(10px)}
+.acard.span2{grid-column:1/-1}
+.ac-t{font-family:'Clash Display',sans-serif;font-size:17px;font-weight:600;margin-bottom:5px}
+.ac-s{color:var(--muted);font-size:13px;margin-bottom:20px;line-height:1.6}
+.cff{margin-bottom:14px}
+.cff label{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:5px}
+.cff input{width:100%;background:var(--ink3);border:1px solid var(--wire2);border-radius:8px;padding:10px 13px;color:var(--text);font-family:'Cabinet Grotesk',sans-serif;font-size:13px;outline:none;transition:border-color .2s}
+.cff input:focus{border-color:var(--lime)}
+.cff input::placeholder{color:var(--muted)}
+.savebtn{width:100%;background:var(--lime);color:var(--ink);border:none;border-radius:9px;padding:12px;font-size:14px;font-weight:800;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif;transition:transform .2s,box-shadow .2s;margin-top:4px}
+.savebtn:hover{transform:translateY(-1px);box-shadow:0 10px 32px rgba(185,255,75,.28)}
+.pgrid{display:grid;grid-template-columns:1fr 1fr;gap:9px}
+.pbadge{display:flex;align-items:center;gap:9px;background:var(--ink3);border-radius:9px;padding:11px}
+.pbadge .pi{font-size:17px}
+.pbadge strong{display:block;font-size:13px;font-weight:700}
+.pbadge span{font-size:11px;color:var(--muted)}
+.divider{height:1px;background:var(--wire);margin:18px 0}
+.slist2{display:flex;flex-direction:column;gap:18px}
+.s2{display:flex;gap:14px}
+.s2n{width:30px;height:30px;border-radius:50%;flex-shrink:0;background:var(--lime-dim);border:1px solid rgba(185,255,75,.3);color:var(--lime);font-weight:800;font-size:12px;display:flex;align-items:center;justify-content:center}
+.s2b{font-size:13px;line-height:1.7}
+.s2b strong{color:var(--text);font-weight:700}
+.s2b p{color:var(--muted);margin-top:1px}
+.cinl{display:inline-block;background:var(--ink3);border-radius:4px;padding:1px 6px;font-family:monospace;font-size:11px;color:var(--lime)}
+.cblk{display:block;background:var(--ink3);border:1px solid var(--wire2);border-radius:8px;padding:13px;font-family:monospace;font-size:11px;color:var(--lime);margin-top:8px;overflow-x:auto;white-space:pre;line-height:1.7}
+.eplist{display:flex;flex-direction:column;gap:7px;font-size:12px;color:var(--muted)}
+
+/* MODAL */
+.mbg{position:fixed;inset:0;background:rgba(0,0,0,.75);backdrop-filter:blur(12px);z-index:500;display:none;align-items:center;justify-content:center;padding:20px}
+.mbg.on{display:flex}
+.mbox{background:var(--ink2);border:1px solid var(--wire2);border-radius:20px;padding:32px;max-width:560px;width:100%;position:relative;max-height:85vh;overflow-y:auto;animation:rise .3s ease}
+.mx{position:absolute;top:14px;right:14px;background:var(--ink3);border:1px solid var(--wire);border-radius:7px;width:30px;height:30px;color:var(--muted);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:16px;transition:color .15s;font-family:monospace}
+.mx:hover{color:var(--text)}
+.mhead{display:flex;gap:16px;align-items:center;margin-bottom:24px}
+.mav{width:68px;height:68px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Clash Display',sans-serif;font-weight:700;font-size:24px;position:relative}
+.mavring{position:absolute;inset:-3px;border-radius:50%;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);z-index:-1}
+.mname{font-family:'Clash Display',sans-serif;font-size:22px;font-weight:700}
+.mhandle{color:var(--muted);font-size:13px;margin-top:3px}
+.mkpis{display:grid;grid-template-columns:repeat(3,1fr);gap:11px;margin-bottom:20px}
+.mkpi{background:var(--ink3);border-radius:11px;padding:14px;text-align:center}
+.mkpi-v{font-family:'Clash Display',sans-serif;font-size:20px;font-weight:700}
+.mkpi-l{font-size:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-top:3px}
+.minfo{display:flex;flex-direction:column;gap:9px}
+.mrow{display:flex;gap:10px;font-size:13px;align-items:flex-start}
+.mrlbl{color:var(--muted);min-width:108px;font-size:12px}
+.erform{background:var(--lime-dim);border:1px solid rgba(185,255,75,.2);border-radius:9px;padding:12px;margin-top:18px;font-size:12px;color:var(--lime);font-weight:600;text-align:center}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--ink2);border:1px solid var(--wire2);border-radius:11px;padding:12px 18px;font-size:13px;font-weight:600;z-index:999;transform:translateY(70px);opacity:0;transition:all .4s cubic-bezier(.34,1.56,.64,1);pointer-events:none;max-width:340px}
+.toast.on{transform:translateY(0);opacity:1}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:5px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--muted2);border-radius:3px}
+
+/* NICHE COLORS */
+.n-Lifestyle{color:#a78bfa;background:rgba(167,139,250,.12)}
+.n-Fitness{color:#fb923c;background:rgba(251,146,60,.12)}
+.n-Food{color:#fbbf24;background:rgba(251,191,36,.12)}
+.n-Tech{color:#60c3ff;background:rgba(96,195,255,.12)}
+.n-Beauty{color:#f472b6;background:rgba(244,114,182,.12)}
+.n-Travel{color:#34d399;background:rgba(52,211,153,.12)}
+.n-Finance{color:#b9ff4b;background:rgba(185,255,75,.12)}
+.n-Gaming{color:#818cf8;background:rgba(129,140,248,.12)}
+</style>
+</head>
+<body>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+
+<!-- NAV -->
+<nav>
+  <div class="logo" onclick="go('land')">
+    <div class="logo-mark">C</div>
+    <div class="logo-text">Collab<span>Connect</span></div>
+  </div>
+  <div class="nav-tabs">
+    <button class="ntab" onclick="go('land')">Home</button>
+    <button class="ntab on" id="nt-dash" onclick="go('dash')">Dashboard</button>
+    <button class="ntab" id="nt-api" onclick="go('api')">IG API Setup</button>
+  </div>
+  <div class="nav-right">
+    <div class="status-pill">
+      <div class="sdot" id="sdot"></div>
+      <span id="stxt">Not connected</span>
+    </div>
+    <button class="ig-btn" onclick="go('api')">
+      <svg width="13" height="13" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+      Connect IG API
+    </button>
+  </div>
+</nav>
+
+<!-- LANDING -->
+<div class="view on" id="v-land">
+  <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 64px);padding:80px 24px 60px;text-align:center">
+    <div class="eyebrow"><span class="pdot"></span> Influencer Intelligence Platform</div>
+    <h1 class="h1">Find the Voice<em>Your Brand Needs</em></h1>
+    <p class="sub">Collab Connect aggregates niche influencers with real, calculated engagement rates — built for businesses that want reach that actually converts.</p>
+    <div class="hero-btns">
+      <button class="btn-lime" onclick="go('dash')">Open Business Dashboard →</button>
+      <button class="btn-ghost" onclick="go('api')">Setup Instagram API</button>
+    </div>
+    <div class="feat-grid">
+      <div class="feat">
+        <span class="feat-icon">📊</span>
+        <div class="feat-title">Engagement Rate Engine</div>
+        <div class="feat-desc">(Likes + Comments) ÷ Followers × 100. Auto-calculated. No vanity metrics.</div>
+      </div>
+      <div class="feat">
+        <span class="feat-icon" style="background:linear-gradient(135deg,#833ab4,#fcb045);-webkit-background-clip:text;-webkit-text-fill-color:transparent;display:block">IG</span>
+        <div class="feat-title">Instagram Graph API</div>
+        <div class="feat-desc">Pull real creator data via Meta's official API. No scraping. Fully compliant.</div>
+      </div>
+      <div class="feat">
+        <span class="feat-icon">🎯</span>
+        <div class="feat-title">Niche Categorization</div>
+        <div class="feat-desc">8 content niches. Smart filters by ER, size, and location. Shortlist for campaigns.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- DASHBOARD -->
+<div class="view" id="v-dash">
+  <div class="dash">
+    <!-- SIDEBAR -->
+    <aside class="dsbar">
+      <div class="dsbar-lbl">Niches</div>
+      <div id="niche-sb"></div>
+      <div class="dsbar-lbl">Reach Tier</div>
+      <button class="si on" data-sz="" onclick="setSz('',this)">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+        All Tiers <span class="sbadge" id="sb-all">—</span>
+      </button>
+      <button class="si" data-sz="nano" onclick="setSz('nano',this)">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/></svg>
+        Nano &lt;10K <span class="sbadge" id="sb-nano">—</span>
+      </button>
+      <button class="si" data-sz="micro" onclick="setSz('micro',this)">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="6"/></svg>
+        Micro 10–100K <span class="sbadge" id="sb-micro">—</span>
+      </button>
+      <button class="si" data-sz="macro" onclick="setSz('macro',this)">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/></svg>
+        Macro 100K+ <span class="sbadge" id="sb-macro">—</span>
+      </button>
+      <div class="dsbar-lbl">Sort By</div>
+      <button class="si on" onclick="setSort('er',this)">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/></svg>
+        Engagement Rate
+      </button>
+      <button class="si" onclick="setSort('followers',this)">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        Followers
+      </button>
+      <button class="si" onclick="setSort('name',this)">
+        <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h12M3 18h6"/></svg>
+        Name A–Z
+      </button>
+    </aside>
+
+    <!-- FEED -->
+    <div class="feed">
+      <div class="kpi-row">
+        <div class="kpi"><div class="kpi-lbl">Influencers</div><div class="kpi-val" id="k-tot">10</div><div class="kpi-sub">in database</div></div>
+        <div class="kpi"><div class="kpi-lbl">Avg Engagement</div><div class="kpi-val" id="k-er">—</div><div class="kpi-sub">all niches</div></div>
+        <div class="kpi"><div class="kpi-lbl">Total Reach</div><div class="kpi-val" id="k-reach">—</div><div class="kpi-sub">combined</div></div>
+        <div class="kpi"><div class="kpi-lbl">Shortlisted</div><div class="kpi-val" id="k-sl">0</div><div class="kpi-sub">for campaign</div></div>
+      </div>
+      <div class="toolbar">
+        <div class="sbox">
+          <svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" style="color:var(--muted);flex-shrink:0"><circle cx="11" cy="11" r="8"/><path d="M21 21l-2-2"/></svg>
+          <input type="text" id="q" placeholder="Search name or @handle…" oninput="filter()">
+        </div>
+        <select class="fsel" id="q-er" onchange="filter()">
+          <option value="0">Any ER</option>
+          <option value="3">3%+ ER</option>
+          <option value="5">5%+ ER</option>
+          <option value="8">8%+ ER</option>
+          <option value="12">12%+ ER</option>
+        </select>
+        <select class="fsel" id="q-loc" onchange="filter()">
+          <option value="">Any Location</option>
+          <option>Manila</option><option>Cebu</option><option>BGC</option>
+          <option>Makati</option><option>Quezon City</option><option>Davao</option>
+          <option>Taguig</option><option>Pasig</option>
+        </select>
+      </div>
+      <div class="chips" id="niche-chips"></div>
+      <div class="cgrid" id="cgrid"></div>
+      <div id="no-res"><div>🔍</div><div style="font-family:'Clash Display',sans-serif;font-size:17px;color:var(--text);margin-bottom:5px">No influencers found</div><div>Adjust your filters</div></div>
+    </div>
+
+    <!-- RIGHT PANEL -->
+    <aside class="dpanel">
+      <div class="plbl">Instagram Lookup</div>
+      <div class="pcard">
+        <div class="pcard-t">Fetch Creator Data</div>
+        <div class="pcard-s">Pull live stats from Instagram Graph API using an IG User ID + token.</div>
+        <div class="igf"><label>IG Business User ID</label><input id="ig-uid" placeholder="17841400008460056"></div>
+        <div class="igf"><label>Access Token</label><input id="ig-tok" placeholder="Saved token auto-fills"></div>
+        <button class="igfetch" onclick="igFetch()">Fetch from Instagram →</button>
+        <div class="apistatus" id="ig-status"></div>
+      </div>
+
+      <div class="plbl" style="margin-top:18px">Shortlist <span style="color:var(--lime)" id="sl-badge">(0)</span></div>
+      <div class="sl-list" id="sl-list">
+        <div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Click "Shortlist" on a card to add here</div>
+      </div>
+
+      <div class="plbl" style="margin-top:18px">Quick Setup</div>
+      <div class="pcard">
+        <div class="pcard-t" style="display:flex;align-items:center;gap:8px">API Steps <button onclick="go('api')" style="background:var(--lime-dim);border:none;border-radius:5px;padding:2px 9px;color:var(--lime);font-size:10px;font-weight:700;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif">Full Guide →</button></div>
+        <div style="margin-top:12px">
+          <div class="guide-step"><div class="gnum">1</div><div class="gtxt"><strong>Create Meta Developer App</strong><br>developers.facebook.com → Business type</div></div>
+          <div class="guide-step"><div class="gnum">2</div><div class="gtxt"><strong>Add Instagram Graph API</strong><br>instagram_basic + pages_show_list</div></div>
+          <div class="guide-step"><div class="gnum">3</div><div class="gtxt"><strong>Generate Long-Lived Token</strong><br>Valid 60 days. Paste in Full Guide</div></div>
+          <div class="guide-step"><div class="gnum">4</div><div class="gtxt"><strong>Get IG Business Account ID</strong><br>From /me/accounts → instagram_business_account</div></div>
+        </div>
+      </div>
+    </aside>
+  </div>
+</div>
+
+<!-- IG API SETUP PAGE -->
+<div class="view" id="v-api">
+  <div class="apg">
+    <div style="display:flex;align-items:center;gap:14px;margin-bottom:6px">
+      <div style="width:46px;height:46px;border-radius:12px;background:linear-gradient(135deg,#833ab4,#fd1d1d,#fcb045);display:flex;align-items:center;justify-content:center;font-size:20px">📸</div>
+      <div><div class="apg-title">Instagram API Setup</div></div>
+    </div>
+    <div class="apg-sub">Configure your Meta Developer credentials. All data stored locally — never sent externally.</div>
+    <div class="atwo">
+
+      <!-- CREDENTIALS -->
+      <div class="acard">
+        <div class="ac-t">🔑 API Credentials</div>
+        <div class="ac-s">Enter your Meta app credentials to enable live Instagram data fetching.</div>
+        <div class="cff"><label>App ID</label><input id="c-appid" placeholder="123456789012345"></div>
+        <div class="cff"><label>App Secret</label><input id="c-secret" type="password" placeholder="••••••••••••••••••••••••"></div>
+        <div class="cff"><label>Long-Lived Access Token</label><input id="c-token" placeholder="EAABsbCS4e4oBO…"></div>
+        <div class="cff"><label>Google Sheets Web App URL (optional)</label><input id="c-sheets" placeholder="https://script.google.com/macros/s/…/exec"></div>
+        <button class="savebtn" onclick="saveCfg()">✦ Save & Activate</button>
+        <div class="apistatus" id="cfg-s"></div>
+      </div>
+
+      <!-- PERMISSIONS -->
+      <div class="acard">
+        <div class="ac-t">🔐 Required API Permissions</div>
+        <div class="ac-s">These Instagram Graph API scopes unlock the data Collab Connect needs.</div>
+        <div class="pgrid">
+          <div class="pbadge"><div class="pi">👤</div><div><strong>instagram_basic</strong><span>Profile & follower count</span></div></div>
+          <div class="pbadge"><div class="pi">📸</div><div><strong>instagram_manage_insights</strong><span>Post metrics & reach</span></div></div>
+          <div class="pbadge"><div class="pi">📄</div><div><strong>pages_show_list</strong><span>Linked Facebook Pages</span></div></div>
+          <div class="pbadge"><div class="pi">📊</div><div><strong>pages_read_engagement</strong><span>Likes & comments data</span></div></div>
+        </div>
+        <div class="divider"></div>
+        <div style="font-family:'Clash Display',sans-serif;font-size:14px;font-weight:600;margin-bottom:10px">📡 Endpoints Used</div>
+        <div class="eplist">
+          <div><span class="cinl">GET /{ig-user-id}</span> — Profile, followers, bio</div>
+          <div><span class="cinl">GET /{ig-user-id}/media</span> — Recent posts list</div>
+          <div><span class="cinl">GET /{media-id}</span> — Likes & comments per post</div>
+          <div><span class="cinl">GET /{ig-user-id}/insights</span> — Reach, impressions</div>
+        </div>
+      </div>
+
+      <!-- STEP-BY-STEP -->
+      <div class="acard span2">
+        <div class="ac-t">📋 Complete Setup Guide</div>
+        <div class="ac-s">From zero to live Instagram data in under 20 minutes.</div>
+        <div class="slist2">
+          <div class="s2"><div class="s2n">1</div><div class="s2b"><strong>Create a Meta Developer Account</strong><p>Go to <span class="cinl">developers.facebook.com</span> → sign in → click "Get Started" to register as a developer.</p></div></div>
+          <div class="s2"><div class="s2n">2</div><div class="s2b"><strong>Create a New App → Business type</strong><p>Click "Create App", choose <strong>Business</strong>. Name it "Collab Connect". This unlocks Instagram Graph API access.</p></div></div>
+          <div class="s2"><div class="s2n">3</div><div class="s2b"><strong>Add Instagram Graph API Product</strong><p>From Dashboard → "Add Product" → find "Instagram Graph API" → Set Up. Link a Facebook Page connected to an Instagram Business or Creator account.</p></div></div>
+          <div class="s2"><div class="s2n">4</div><div class="s2b"><strong>Generate Access Token → Exchange for Long-Lived (60 days)</strong><p>Tools → Graph API Explorer → select permissions → Generate. Then exchange:</p><div class="cblk">GET https://graph.facebook.com/v19.0/oauth/access_token
+  ?grant_type=fb_exchange_token
+  &client_id={app-id}
+  &client_secret={app-secret}
+  &fb_exchange_token={short-lived-token}</div></div></div>
+          <div class="s2"><div class="s2n">5</div><div class="s2b"><strong>Get the Instagram Business User ID</strong><p>You need the IG User ID (not username) to query any creator's data:</p><div class="cblk">GET https://graph.facebook.com/v19.0/me/accounts
+  ?access_token={token}
+
+// Then for each page result:
+GET https://graph.facebook.com/v19.0/{page-id}
+  ?fields=instagram_business_account
+  &access_token={token}
+// Returns: { "instagram_business_account": { "id": "17841400..." } }</div></div></div>
+          <div class="s2"><div class="s2n">6</div><div class="s2b"><strong>Fetch Profile + Posts → Auto-Calculate ER</strong><p>The core data pipeline Collab Connect uses:</p><div class="cblk">// Step A: Profile
+GET https://graph.instagram.com/v19.0/{ig-user-id}
+  ?fields=id,username,name,biography,followers_count,media_count
+  &access_token={token}
+
+// Step B: Recent 12 Posts
+GET https://graph.instagram.com/v19.0/{ig-user-id}/media
+  ?fields=like_count,comments_count&limit=12
+  &access_token={token}
+
+// Step C: Calculate ER
+avgLikes    = SUM(post.like_count) / 12
+avgComments = SUM(post.comments_count) / 12
+ER%         = (avgLikes + avgComments) / followers_count × 100</div></div></div>
+          <div class="s2"><div class="s2n">7</div><div class="s2b"><strong>Submit App for Advanced Access (to query any public account)</strong><p>In dev mode, only accounts linked to your app are accessible. For full marketplace use, submit for <strong>Advanced Access</strong> under App Review. State your use case: influencer marketplace for brand-creator matching.</p></div></div>
+          <div class="s2"><div class="s2n">8</div><div class="s2b"><strong>Paste credentials in the form above → start fetching</strong><p>Once saved, every "Live" button and IG lookup uses your token automatically. All data syncs to Google Sheets if configured.</p></div></div>
+        </div>
+      </div>
+
+      <!-- SHEETS SETUP -->
+      <div class="acard span2">
+        <div class="ac-t">📊 Google Sheets Database — Apps Script</div>
+        <div class="ac-s">Every influencer pulled from Instagram auto-appends a row to your Sheet.</div>
+        <div class="slist2">
+          <div class="s2"><div class="s2n">A</div><div class="s2b"><strong>Create a Google Sheet with these headers in Row 1:</strong><div class="cblk">Name | Handle | Niche | Followers | Avg Likes | Avg Comments | ER% | Bio | Source | Fetched At</div></div></div>
+          <div class="s2"><div class="s2n">B</div><div class="s2b"><strong>Extensions → Apps Script → paste this code:</strong><div class="cblk">function doPost(e) {
+  const s = SpreadsheetApp.getActiveSpreadsheet()
+              .getSheetByName("Sheet1");
+  const d = JSON.parse(e.postData.contents);
+  s.appendRow([d.name, d.handle, d.niche, d.followers,
+    d.avgLikes, d.avgComments, d.er, d.bio,
+    d.source, new Date().toISOString()]);
+  return ContentService
+    .createTextOutput(JSON.stringify({status:"ok"}))
+    .setMimeType(ContentService.MimeType.JSON);
+}
+function doGet(e) {
+  return ContentService
+    .createTextOutput(JSON.stringify({status:"alive"}))
+    .setMimeType(ContentService.MimeType.JSON);
+}</div></div></div>
+          <div class="s2"><div class="s2n">C</div><div class="s2b"><strong>Deploy → New Deployment → Web App → Anyone</strong><p>Copy the Web App URL → paste into "Google Sheets URL" in the credentials form above. Every API fetch now auto-syncs.</p></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL -->
+<div class="mbg" id="modal"><div class="mbox"><button class="mx" onclick="closeModal()">✕</button><div id="modal-inner"></div></div></div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="toast-m"></span></div>
+
+<script>
+// ══ DATA ══
+const NICHES={
+  Lifestyle:{e:'✨',c:'#a78bfa'},Fitness:{e:'💪',c:'#fb923c'},Food:{e:'🍜',c:'#fbbf24'},
+  Tech:{e:'⚡',c:'#60c3ff'},Beauty:{e:'💅',c:'#f472b6'},Travel:{e:'🌏',c:'#34d399'},
+  Finance:{e:'📈',c:'#b9ff4b'},Gaming:{e:'🎮',c:'#818cf8'}
+};
+const AVC=['#7b5cfa','#fb923c','#fbbf24','#60c3ff','#f472b6','#34d399','#b9ff4b','#818cf8','#a78bfa','#f87171'];
+let DB=[
+  {id:1,name:'Maria Santos',handle:'@mariasantos',email:'maria@collab.ph',phone:'+63 917 123 4567',location:'Manila',niche:'Lifestyle',followers:82000,posts:410,avgLikes:4200,avgComments:138,bio:'Everyday living, OOTDs, and local travel.'},
+  {id:2,name:'Jake Reyes',handle:'@jakefitph',email:'jake@fitph.com',phone:'+63 918 234 5678',location:'Cebu',niche:'Fitness',followers:41000,posts:290,avgLikes:3100,avgComments:210,bio:'Certified trainer sharing workouts & nutrition tips.'},
+  {id:3,name:'Chloe Tan',handle:'@chloeeats',email:'chloe@chloeeats.com',phone:'+63 919 345 6789',location:'BGC',niche:'Food',followers:127000,posts:580,avgLikes:7800,avgComments:320,bio:"Food blogger covering Metro Manila's best eats."},
+  {id:4,name:'Luis Garcia',handle:'@techbyluisg',email:'luis@techbyluis.io',phone:'+63 916 456 7890',location:'Makati',niche:'Tech',followers:58000,posts:220,avgLikes:2900,avgComments:95,bio:'Tech reviews, unboxings, and PH tech news.'},
+  {id:5,name:'Bianca Cruz',handle:'@biancaglows',email:'bianca@glow.ph',phone:'+63 915 567 8901',location:'Quezon City',niche:'Beauty',followers:95000,posts:640,avgLikes:6500,avgComments:280,bio:'Skincare routines, makeup looks, K-beauty.'},
+  {id:6,name:'Marco Dela Rosa',handle:'@wandermarco',email:'marco@wander.ph',phone:'+63 917 678 9012',location:'Davao',niche:'Travel',followers:34000,posts:195,avgLikes:2600,avgComments:145,bio:'Mindanao-based travel creator, hidden gems.'},
+  {id:7,name:'Patricia Lim',handle:'@patriciainvests',email:'pat@phinvestor.com',phone:'+63 918 789 0123',location:'Taguig',niche:'Finance',followers:62000,posts:310,avgLikes:3800,avgComments:195,bio:'Personal finance for Filipino millennials.'},
+  {id:8,name:'Ryan Uy',handle:'@ryanplays',email:'ryan@ryanplays.gg',phone:'+63 919 890 1234',location:'Manila',niche:'Gaming',followers:21000,posts:150,avgLikes:1800,avgComments:310,bio:'Mobile gaming: ML, Valorant, streams.'},
+  {id:9,name:'Andrea Flores',handle:'@andreafit',email:'andrea@fitph.co',phone:'+63 916 901 2345',location:'Pasig',niche:'Fitness',followers:18500,posts:180,avgLikes:2100,avgComments:160,bio:"Women's fitness, body positivity, home workouts."},
+  {id:10,name:'Kevin Ong',handle:'@kevintech',email:'kevin@kevtech.ph',phone:'+63 915 012 3456',location:'Cebu',niche:'Tech',followers:8900,posts:95,avgLikes:980,avgComments:75,bio:'Budget gadgets for Filipino tech enthusiasts.'}
+];
+let shortlist=[],activeN='',activeSz='',activeSort='er';
+
+// ══ HELPERS ══
+const ER=i=>(((i.avgLikes+i.avgComments)/i.followers)*100);
+const fmt=n=>n>=1e6?(n/1e6).toFixed(1)+'M':n>=1000?(n/1000).toFixed(0)+'K':n;
+const ini=n=>n.split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase();
+const avc=id=>AVC[id%AVC.length];
+
+// ══ NAV ══
+function go(v){
+  document.querySelectorAll('.view').forEach(e=>e.classList.remove('on'));
+  document.querySelectorAll('.ntab').forEach(e=>e.classList.remove('on'));
+  document.getElementById('v-'+v).classList.add('on');
+  if(v==='dash'){document.getElementById('nt-dash').classList.add('on');renderDash();}
+  if(v==='api') document.getElementById('nt-api').classList.add('on');
+}
+
+// ══ DASHBOARD ══
+function renderDash(){buildNicheSB();buildChips();updateKPIs();updateSBadges();filter();}
+
+function buildNicheSB(){
+  const counts={};DB.forEach(i=>counts[i.niche]=(counts[i.niche]||0)+1);
+  document.getElementById('niche-sb').innerHTML=
+    `<button class="si ${!activeN?'on':''}" onclick="setN('',this)">
+      <svg width="13" height="13" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path d="M3 7h18M3 12h18M3 17h18"/></svg>
+      All Niches <span class="sbadge">${DB.length}</span></button>`+
+    Object.entries(NICHES).map(([n,d])=>
+      `<button class="si ${activeN===n?'on':''}" onclick="setN('${n}',this)">
+        <span style="font-size:12px">${d.e}</span> ${n}<span class="sbadge">${counts[n]||0}</span></button>`
+    ).join('');
+}
+
+function buildChips(){
+  document.getElementById('niche-chips').innerHTML=
+    `<button class="chip ${!activeN?'on':''}" onclick="setN('',this)">All</button>`+
+    Object.entries(NICHES).map(([n,d])=>
+      `<button class="chip ${activeN===n?'on':''}" onclick="setN('${n}',this)">${d.e} ${n}</button>`
+    ).join('');
+}
+
+function updateSBadges(){
+  let nano=0,micro=0,macro=0;
+  DB.forEach(i=>{if(i.followers<10000)nano++;else if(i.followers<100000)micro++;else macro++;});
+  document.getElementById('sb-all').textContent=DB.length;
+  document.getElementById('sb-nano').textContent=nano;
+  document.getElementById('sb-micro').textContent=micro;
+  document.getElementById('sb-macro').textContent=macro;
+}
+
+function updateKPIs(){
+  const tot=DB.length;
+  const avgER=(DB.reduce((a,i)=>a+ER(i),0)/tot).toFixed(1);
+  const reach=DB.reduce((a,i)=>a+i.followers,0);
+  document.getElementById('k-tot').textContent=tot;
+  document.getElementById('k-er').textContent=avgER+'%';
+  document.getElementById('k-reach').textContent=fmt(reach);
+  document.getElementById('k-sl').textContent=shortlist.length;
+}
+
+function filter(){
+  const q=(document.getElementById('q')?.value||'').toLowerCase();
+  const erMin=parseFloat(document.getElementById('q-er')?.value)||0;
+  const loc=document.getElementById('q-loc')?.value||'';
+  let list=DB.filter(i=>{
+    const mq=!q||i.name.toLowerCase().includes(q)||i.handle.toLowerCase().includes(q);
+    const mn=!activeN||i.niche===activeN;
+    const mer=ER(i)>=erMin;
+    const ml=!loc||i.location===loc;
+    let ms=true;
+    if(activeSz==='nano')ms=i.followers<10000;
+    if(activeSz==='micro')ms=i.followers>=10000&&i.followers<100000;
+    if(activeSz==='macro')ms=i.followers>=100000;
+    return mq&&mn&&mer&&ml&&ms;
+  });
+  if(activeSort==='er')list.sort((a,b)=>ER(b)-ER(a));
+  else if(activeSort==='followers')list.sort((a,b)=>b.followers-a.followers);
+  else list.sort((a,b)=>a.name.localeCompare(b.name));
+  renderCards(list);
+}
+
+function renderCards(list){
+  const g=document.getElementById('cgrid');
+  const nr=document.getElementById('no-res');
+  g.innerHTML='';
+  if(!list.length){nr.style.display='block';return;}
+  nr.style.display='none';
+  list.forEach(i=>g.appendChild(makeCard(i)));
+}
+
+function makeCard(i){
+  const erv=ER(i).toFixed(1);
+  const erp=Math.min(ER(i)/20*100,100);
+  const ac=avc(i.id);
+  const n=NICHES[i.niche]||{e:'•',c:'#888'};
+  const inSL=shortlist.some(s=>s.id===i.id);
+  const d=document.createElement('div');
+  d.className='icard';d.onclick=()=>openModal(i.id);
+  d.innerHTML=`
+    <div class="card-top">
+      <div class="av-wrap">
+        <div class="av" style="background:${ac}20;color:${ac}">${ini(i.name)}</div>
+        <div class="av-ring"></div>
+      </div>
+      <div class="cmeta">
+        <div class="cname">${i.name}</div>
+        <div class="chandle">${i.handle}</div>
+        <span class="nbadge n-${i.niche}">${n.e} ${i.niche}</span>
+      </div>
+    </div>
+    <div class="cer-block">
+      <div>
+        <div class="cer-lbl">Engagement Rate</div>
+        <div class="ertrack"><div class="erfill" style="width:${erp}%"></div></div>
+      </div>
+      <div class="cer-val">${erv}%</div>
+    </div>
+    <div class="cstats">
+      <div class="cs"><span class="cs-v" style="color:${ac}">${fmt(i.followers)}</span><span class="cs-l">Followers</span></div>
+      <div class="cs"><span class="cs-v">${fmt(i.avgLikes)}</span><span class="cs-l">Avg Likes</span></div>
+      <div class="cs"><span class="cs-v">${i.avgComments}</span><span class="cs-l">Avg Cmts</span></div>
+    </div>
+    <div class="cbottom">
+      <div class="cloc">📍 ${i.location}</div>
+      <button class="cbtn" onclick="event.stopPropagation();sl(${i.id},this)">${inSL?'✓ Listed':'Shortlist'}</button>
+      <button class="igbtn" onclick="event.stopPropagation();quickFetch('${i.handle.replace('@','')}')">
+        <svg width="11" height="11" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+        Live
+      </button>
+    </div>`;
+  return d;
+}
+
+// ══ FILTERS ══
+function setN(n,el){activeN=n;buildNicheSB();buildChips();filter();}
+function setSz(s,el){activeSz=s;document.querySelectorAll('[data-sz]').forEach(b=>b.classList.remove('on'));el.classList.add('on');filter();}
+function setSort(s,el){
+  activeSort=s;
+  document.querySelectorAll('.dsbar .si').forEach(b=>{
+    if(['er','followers','name'].some(k=>b.getAttribute('onclick')?.includes("'"+k+"'")))b.classList.remove('on');
+  });
+  el.classList.add('on');filter();
+}
+
+// ══ SHORTLIST ══
+function sl(id,btn){
+  const i=DB.find(x=>x.id===id);
+  const idx=shortlist.findIndex(x=>x.id===id);
+  if(idx>-1){shortlist.splice(idx,1);if(btn)btn.textContent='Shortlist';toast(`Removed ${i.name}`);}
+  else{shortlist.push(i);if(btn)btn.textContent='✓ Listed';toast(`${i.name} shortlisted ✓`);}
+  renderSL();updateKPIs();
+}
+function renderSL(){
+  document.getElementById('sl-badge').textContent=`(${shortlist.length})`;
+  const el=document.getElementById('sl-list');
+  if(!shortlist.length){el.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Click "Shortlist" on a card to add here</div>';return;}
+  el.innerHTML=shortlist.map(i=>{
+    const ac=avc(i.id);
+    return `<div class="sli">
+      <div class="slav" style="background:${ac}20;color:${ac}">${ini(i.name)}</div>
+      <div><div class="slname">${i.name}</div><div style="font-size:11px;color:var(--muted)">${i.handle}</div></div>
+      <div class="sler">${ER(i).toFixed(1)}%</div>
+      <button class="slrm" onclick="sl(${i.id})">×</button>
+    </div>`;
+  }).join('');
+}
+
+// ══ INSTAGRAM API ══
+async function igFetch(){
+  const uid=document.getElementById('ig-uid').value.trim();
+  const tok=document.getElementById('ig-tok').value.trim()||localStorage.getItem('cc_token')||'';
+  const st=document.getElementById('ig-status');
+  if(!uid||!tok){setS(st,'err','⚠ Enter IG User ID and access token');return;}
+  setS(st,'loading','⏳ Fetching from Instagram Graph API…');
+  try{
+    const r=await fetch(`https://graph.instagram.com/v19.0/${uid}?fields=id,username,name,biography,followers_count,media_count&access_token=${tok}`);
+    const d=await r.json();
+    if(d.error){setS(st,'err',`API Error: ${d.error.message}`);return;}
+    const mr=await fetch(`https://graph.instagram.com/v19.0/${uid}/media?fields=like_count,comments_count&limit=12&access_token=${tok}`);
+    const md=await mr.json();
+    let al=0,ac=0;
+    if(md.data&&md.data.length){
+      al=Math.round(md.data.reduce((a,p)=>a+(p.like_count||0),0)/md.data.length);
+      ac=Math.round(md.data.reduce((a,p)=>a+(p.comments_count||0),0)/md.data.length);
+    }
+    const inf={id:DB.length+1,name:d.name||d.username,handle:'@'+d.username,email:'',phone:'',location:'',niche:'Lifestyle',followers:d.followers_count||0,posts:d.media_count||0,avgLikes:al,avgComments:ac,bio:d.biography||'',source:'Instagram API'};
+    DB.push(inf);
+    setS(st,'ok',`✓ @${d.username} added! ER: ${ER(inf).toFixed(1)}%`);
+    setConnected(true);
+    syncSheets(inf);
+    renderDash();
+    toast(`@${d.username} fetched from Instagram ✓`);
+  }catch(e){setS(st,'err','Network error — check token or CORS settings.');}
+}
+
+function quickFetch(handle){
+  const tok=localStorage.getItem('cc_token')||'';
+  if(!tok){toast('⚠ Save your API token in IG API Setup first');go('api');return;}
+  toast(`Open IG API Setup → paste User ID for @${handle} to fetch live data`);
+}
+
+function setS(el,t,m){el.className='apistatus '+t;el.textContent=m;}
+function setConnected(on){
+  document.getElementById('sdot').classList.toggle('live',on);
+  document.getElementById('stxt').textContent=on?'API connected':'Not connected';
+}
+
+// ══ CONFIG ══
+function saveCfg(){
+  const t=document.getElementById('c-token').value.trim();
+  const st=document.getElementById('cfg-s');
+  if(!t){setS(st,'err','⚠ Access token is required');return;}
+  localStorage.setItem('cc_appid',document.getElementById('c-appid').value.trim());
+  localStorage.setItem('cc_secret',document.getElementById('c-secret').value.trim());
+  localStorage.setItem('cc_token',t);
+  const sh=document.getElementById('c-sheets').value.trim();
+  if(sh)localStorage.setItem('cc_sheets',sh);
+  document.getElementById('ig-tok').value=t;
+  setS(st,'ok','✓ Saved! Token ready for all lookups.');
+  setConnected(true);
+  toast('API credentials saved ✓');
+}
+
+// ══ SHEETS ══
+async function syncSheets(i){
+  const url=localStorage.getItem('cc_sheets');if(!url)return;
+  try{await fetch(url,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({name:i.name,handle:i.handle,niche:i.niche,followers:i.followers,avgLikes:i.avgLikes,avgComments:i.avgComments,er:ER(i).toFixed(2),bio:i.bio,source:i.source||'Manual'})});}catch(e){}
+}
+
+// ══ MODAL ══
+function openModal(id){
+  const i=DB.find(x=>x.id===id);if(!i)return;
+  const erv=ER(i).toFixed(1);const erp=Math.min(ER(i)/20*100,100);
+  const ac=avc(i.id);const n=NICHES[i.niche]||{e:'•',c:'#888'};
+  const inSL=shortlist.some(s=>s.id===id);
+  document.getElementById('modal-inner').innerHTML=`
+    <div class="mhead">
+      <div class="mav" style="background:${ac}20;color:${ac}">${ini(i.name)}<div class="mavring"></div></div>
+      <div>
+        <div class="mname">${i.name}</div>
+        <div class="mhandle">${i.handle}</div>
+        <span class="nbadge n-${i.niche}" style="margin-top:6px;display:inline-flex">${n.e} ${i.niche}</span>
+      </div>
+    </div>
+    <div class="mkpis">
+      <div class="mkpi"><div class="mkpi-v" style="color:${ac}">${fmt(i.followers)}</div><div class="mkpi-l">Followers</div></div>
+      <div class="mkpi"><div class="mkpi-v" style="color:var(--lime)">${erv}%</div><div class="mkpi-l">Engagement</div></div>
+      <div class="mkpi"><div class="mkpi-v">${i.posts}</div><div class="mkpi-l">Posts</div></div>
+    </div>
+    <div class="ertrack" style="margin-bottom:20px"><div class="erfill" style="width:${erp}%"></div></div>
+    <div class="minfo">
+      <div class="mrow"><span class="mrlbl">📧 Work Email</span><span>${i.email||'—'}</span></div>
+      <div class="mrow"><span class="mrlbl">📱 Phone</span><span>${i.phone||'—'}</span></div>
+      <div class="mrow"><span class="mrlbl">📍 Location</span><span>${i.location||'—'}</span></div>
+      <div class="mrow"><span class="mrlbl">❤️ Avg Likes</span><span>${fmt(i.avgLikes)}/post</span></div>
+      <div class="mrow"><span class="mrlbl">💬 Avg Comments</span><span>${i.avgComments}/post</span></div>
+      <div class="mrow"><span class="mrlbl">📝 Bio</span><span style="color:var(--muted)">${i.bio||'—'}</span></div>
+      ${i.source?`<div class="mrow"><span class="mrlbl">🔗 Source</span><span style="color:var(--lime);font-weight:700">${i.source}</span></div>`:''}
+    </div>
+    <div class="erform">ER = (${fmt(i.avgLikes)} likes + ${i.avgComments} comments) ÷ ${fmt(i.followers)} followers × 100 = <strong>${erv}%</strong></div>
+    <div style="display:flex;gap:9px;margin-top:18px">
+      <button class="btn-lime" style="flex:1;padding:11px;border-radius:9px;font-size:14px;font-weight:800;cursor:pointer;border:none;font-family:'Cabinet Grotesk',sans-serif" onclick="sl(${i.id});this.textContent='${inSL?'Shortlist':'✓ Shortlisted'}'">${inSL?'✓ Shortlisted':'Shortlist'}</button>
+      <button class="btn-ghost" style="flex:1;padding:11px;border-radius:9px;font-size:14px;cursor:pointer;font-family:'Cabinet Grotesk',sans-serif" onclick="toast('Paste IG User ID in the lookup panel to refresh')">🔄 Refresh from IG</button>
+    </div>`;
+  document.getElementById('modal').classList.add('on');
+}
+function closeModal(){document.getElementById('modal').classList.remove('on');}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal();});
+
+// ══ TOAST ══
+let tt;
+function toast(m){
+  clearTimeout(tt);const t=document.getElementById('toast');
+  document.getElementById('toast-m').textContent=m;
+  t.classList.add('on');tt=setTimeout(()=>t.classList.remove('on'),3500);
+}
+
+// ══ INIT ══
+window.addEventListener('load',()=>{
+  ['c-appid:cc_appid','c-secret:cc_secret','c-token:cc_token','c-sheets:cc_sheets'].forEach(p=>{
+    const[fid,key]=p.split(':');
+    const v=localStorage.getItem(key);if(v){const el=document.getElementById(fid);if(el)el.value=v;}
+  });
+  const tok=localStorage.getItem('cc_token');
+  if(tok){document.getElementById('ig-tok').value=tok;setConnected(true);}
+  go('dash');
+});
+</script>
+</body>
+</html>
